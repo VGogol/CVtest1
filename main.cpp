@@ -55,9 +55,30 @@ void  GOCanny()
 	return;
 }
 
+//读取视频文件
+void  GOReadVideo()
+{
+	while (true)
+	{
+		//读入视频
+		/*VideoCapture   capture("1.flv");*/
+		//从摄像头读取视频
+		VideoCapture   capture(0);
+		while (true)
+		{
+			Mat  frame;            //用于存储每一帧的图像
+			capture >> frame;             //读取当前帧
+			imshow("读取视频", frame);
+			waitKey(30);                 //延时30ms
+		}
+		
+	}
+}
+
 int main()
 {
-	GOCanny();
+	//GOCanny();
+	GOReadVideo();
 	
 	return 0;
 }
