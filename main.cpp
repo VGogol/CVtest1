@@ -75,10 +75,12 @@ void  GOReadVideo()
 	}
 }
 
-int main()
+void main()
 {
+	printf("当前OpenCV版本为 OpenCV %s", CV_VERSION);
+	system("pause");
 	//GOCanny();
-	GOReadVideo();
-	
-	return 0;
+	//GOReadVideo();
+	//getchar();
+	//return 0;
 }
