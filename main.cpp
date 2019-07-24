@@ -1,8 +1,9 @@
 #include<opencv2\opencv.hpp>
+#include<iostream>
 using namespace  cv;
 using namespace  std;
 
-//图像模糊
+//图像均值滤波，图像模糊
 void GOBlur()
 {
 	//载入原始图像
@@ -11,6 +12,7 @@ void GOBlur()
 	imshow("均值滤波原图", srcimage);
 	//进行均值滤波操作
 	Mat  dstimage;
+	//用blur函数进行图像模糊以降噪
 	blur(srcimage, dstimage, Size(7, 7));
 	//显示效果图
 	imshow("均值滤波效果图", dstimage);
@@ -83,7 +85,7 @@ void  CreateAlphaMat(Mat  &mat)
 	{
 		for (int j = 0; j < mat.cols; j++)
 		{
-			Vec4b&rgba = mat.at<	Vec4b>(i, j);
+			Vec4b&rgba = mat.at<Vec4b>(i, j);
 			rgba[0] = UCHAR_MAX;
 			rgba[1] = saturate_cast<uchar>((float(mat.cols - j)) / ((float)mat.cols)*UCHAR_MAX);
 			rgba[2] = saturate_cast<uchar>((float(mat.rows - i)) / ((float)mat.rows)*UCHAR_MAX);
@@ -103,7 +105,7 @@ void  WritePNG()
 
 	try
 	{
-		imwrite("透明alpha值图.png", mat, compression_params);
+		imwrite("生成的透明alpha值图.png", mat, compression_params);
 		imshow("生成的PNG图", mat);
 		fprintf(stdout, "PNG图片文件的alpha数据保存完毕~\n可以在工程目录下查看由imwrite函数生成的图片\n");
 		waitKey(0);
@@ -115,15 +117,79 @@ void  WritePNG()
 	}
 }
 
+//合并图像操作
+void   GOUnionImage()
+{
+	Mat  image1 = imread("3.jpg");
+	namedWindow("图片1");
+	imshow("图片1", image1);
+
+	//图像混合
+	Mat   image = imread("9.jpg", 199);
+	Mat   image2 = imread("8.jpg");
+	Mat   imageunion;
+	//先显示图像
+	namedWindow("2原图画");
+	imshow("2原图画", image);
+
+	namedWindow("3添加图");
+	imshow("3添加图", image2);
+	//定义一个Mat类型，用于存放图像ROI
+	Mat  imageROI;
+	//方法一
+	//imageROI = image(Rect(800, 350, image2.cols, image2.rows));
+	//方法二           出错
+	imageROI = image(Range(100, 100 + image2.rows), Range(300, 300 + image2.cols));
+	//将image2加到image
+	addWeighted(imageROI, 0.5, image2, 0.5, 3, imageunion);
+	//显示结果
+	namedWindow("4原画+图");
+	imshow("4原画加图", imageunion);
+	//将图像保存
+	imwrite("合成的图片.jpg", imageunion);
+	waitKey(0);
+}
+
+//课程3实例代码
+int    lesson3()
+{
+	Mat   image = imread("3.jpg",IMREAD_GRAYSCALE);
+	//载入图像失败
+	if (image.empty())
+	{
+		cout << "could not find  the image source.." << endl;
+		return -1;
+	}
+	namedWindow("MyImage", CV_WINDOW_AUTOSIZE);
+	imshow("MyImage", image);
+	Mat   M;
+	M.create(4, 3, CV_8UC2);
+	//给每个元素赋值，第一个为127，第二个为111
+	M = Scalar(127, 111);
+	cout << "M=" << endl << "" << M << endl << endl;
+	uchar*firstrow = M.ptr<uchar>(1);
+	printf("%d\n", *firstrow);
+	Mat  C = (Mat_<double>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
+	cout << "C=" << endl << "" << C << endl << endl;
+	waitKey(0);
+	return 0;
+}
+
 void main()
 {
 	//显示版本
 	/*printf("当前OpenCV版本为 OpenCV %s", CV_VERSION);
 	system("pause");*/
-	WritePNG();
-	
+	//WritePNG();
+	//GOUnionImage();
 	//GOCanny();
+	//腐蚀
+	//GOErode();
 	//GOReadVideo();
 	//getchar();
 	//return 0;
+	if (-1 == lesson3())
+	{
+		return;
+	}
 }
