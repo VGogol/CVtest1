@@ -3,6 +3,8 @@
 using namespace  cv;
 using namespace  std;
 
+#define  _TESTWINDOW_   "线性混合示例"
+
 //图像均值滤波，图像模糊
 void GOBlur()
 {
@@ -167,6 +169,7 @@ int    lesson3()
 	//给每个元素赋值，第一个为127，第二个为111
 	M = Scalar(127, 111);
 	cout << "M=" << endl << "" << M << endl << endl;
+	//返回地（）行的起点
 	uchar*firstrow = M.ptr<uchar>(1);
 	printf("%d\n", *firstrow);
 	Mat  C = (Mat_<double>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
@@ -174,6 +177,62 @@ int    lesson3()
 	waitKey(0);
 	return 0;
 }
+
+////////////////////////////////////////////////全局变量声明
+const  int  g_nMaxAlphaValue = 100;                  //Alpha值的最大值
+int   g_nAlphaValueSlider;                                 ///滑动条对应的变量
+double    g_dAlphaValue; 
+double    g_dBetaValue;
+//声明图像变量
+Mat   g_srcImage1;
+Mat   g_srcImage2;
+Mat   g_dstImage;
+
+////响应滑动条的回调函数,供3.2.1调用
+void on_TrackBar(int ,void*)
+{
+	///求出当前 Alpha值相对于最大值的比例
+	g_dAlphaValue = (double)g_nAlphaValueSlider / g_nMaxAlphaValue;
+	//beta值为1减去alpha的值
+	g_dBetaValue = 1 - g_dAlphaValue;
+	//根据alpha值和beta值进行线性混合
+	addWeighted(g_srcImage1, g_dAlphaValue, g_srcImage2, g_dBetaValue, 0.0, g_dstImage);
+	//显示效果图
+	imshow(_TESTWINDOW_, g_dstImage);
+}
+
+void  lesson_3_2_1()
+{
+	//加载图像，两图像尺寸需要一致
+	g_srcImage1 = imread("8.jpg");
+	g_srcImage2 = imread("9.jpg");
+	//载入图像失败
+	if (!g_srcImage1.data)
+	{
+		cout << "could not find  the image1 source.." << endl;
+		return;
+	}
+	if (!g_srcImage2.data)
+	{
+		cout << "could not find the image2 soure .." << endl;
+		return;
+	}
+	//设置滑动条初始值为70
+	g_nAlphaValueSlider = 50;
+	//创建窗口
+	namedWindow(_TESTWINDOW_, 1);
+	//再创建的窗口中创建一个滑动条控件
+	char   trackbarname[50];
+	sprintf(trackbarname, "透明值%d", g_nMaxAlphaValue);
+	createTrackbar(trackbarname, _TESTWINDOW_, &g_nAlphaValueSlider, g_nMaxAlphaValue, on_TrackBar);
+	//结果在回调函数中显示
+	on_TrackBar(g_nAlphaValueSlider, 0);
+	//按任意键退出
+	waitKey(0);
+	return;
+
+}
+
 
 void main()
 {
@@ -188,8 +247,9 @@ void main()
 	//GOReadVideo();
 	//getchar();
 	//return 0;
-	if (-1 == lesson3())
-	{
-		return;
-	}
+	//if (-1 == GOUnionImage())
+	//{
+	//	return;
+	//}
+	lesson_3_2_1();
 }
